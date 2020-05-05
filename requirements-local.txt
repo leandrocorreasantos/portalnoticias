@@ -1,0 +1,7 @@
+-r requirements.txt
+flake8==3.3.0
+pytest==3.0.4
+pytest-cov==2.5.1
+ipdb==0.10.2
+Flask-Migrate==2.5.2
+Flask-Script==2.0.6

@@ -1,8 +1,8 @@
 import os
 
 from api import app as application
-from api.v1.resources import CategoriaView as v1_Categoria
-from api.v1.resources import NoticiaView as v1_Noticia
+from api.v1.resources import CategoriasView as v1_Categorias
+from api.v1.resources import NoticiasView as v1_Noticias
 
 
 #  This rule below is an example and can be removed.
@@ -14,7 +14,7 @@ application.add_url_rule(
 
 application.add_url_rule(
     '/v1/noticias',
-    view_func=v1_Noticia.as_view('noticias'),
+    view_func=v1_Noticias.as_view('noticias'),
     methods=['GET']
 )
 

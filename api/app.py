@@ -8,9 +8,14 @@ from api.v1.resources import NoticiasView as v1_Noticias
 #  This rule below is an example and can be removed.
 application.add_url_rule(
     '/v1/categorias',
-    view_func=v1_Categoria.as_view('categorias'),
+    view_func=v1_Categorias.as_view('categorias'),
     methods=['GET']
 )
+
+application.add_url_rule(
+    '/v1/categoria',
+    view_func=v1_Categorias.as_view('categoria'),
+    methods=['POST'])
 
 application.add_url_rule(
     '/v1/noticias',

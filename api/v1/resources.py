@@ -1,10 +1,15 @@
 from http.client import OK
-from flask import jsonify
+from flask import jsonify, request
 from flask.views import MethodView
+from marshmallow import ValidationError
 from api import log, db
 from api.v1.schema import (
+    InternalServerErrorSchema,
     CategoriaSchema, NoticiaSchema,
-    CategoriaValidationErrorSchema
+    CategoriaValidationErrorSchema,
+    CategoriaNotFoundSchema,
+    NoticiaValidationErrorSchema,
+    EmptyDataSchema,
 )
 from api.models import Categoria, Noticia
 
@@ -15,19 +20,23 @@ class CategoriasView(MethodView):
         return jsonify(CategoriaSchema(many=True).dump(categorias)), OK.value
 
     def post(self):
+        data = request.get_json()
+        if not data:
+            return EmptyDataSchema().build()
+
         try:
-    	   categoria = CategoriaSchema().load(request.get_json())
+           categoria = CategoriaSchema().load(data)
         except ValidationError as err:
             return CategoriaValidationErrorSchema().build(err.messages)
 
-    	new_categoria = Categoria(**categoria)
-    	try:
-    		db.session.add(new_categoria)
-    		db.session.commit()
-    	except Exception as e:
-    		log.error("Erro ao cadastrar categoria: {}".format(e))
+        try:
+            db.session.add(Categoria(**categoria))
+            db.session.commit()
+        except Exception as e:
+            log.error("Erro ao cadastrar categoria: {}".format(e))
+            return InternalServerErrorSchema().build("Database Error")
 
-    	return CategoriaSchema().build(new_categoria)
+        return CategoriaSchema().build(categoria)
 
 
 class NoticiasView(MethodView):
@@ -37,12 +46,18 @@ class NoticiasView(MethodView):
 
 
     def post(self):
-    	noticia = NoticiaSchema().load(request.get_json())
-    	new_noticia = Noticia(**noticia)
-    	try:
-    		db.session.add(new_noticia)
-    		db.session.commit()
-    	except Exception as e:
-    		log.error("Erro ao cadastrar notícia: {}".format(e))
+        data = request.get_json()
+        try:
+            noticia = NoticiaSchema.load(data)
+        except ValidationError:
+            return NoticiaValidationError().build()
 
-    	return NoticiaSchema().build(new_noticia)
+        try:
+            db.session.add(noticia)
+            db.session.commit()
+        except Exception as e:
+            log.error("Erro ao cadastrar notícia: {}".format(e))
+
+        return NoticiaSchema().build(new_noticia)
+
+

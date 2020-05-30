@@ -18,7 +18,7 @@ class CategoriasView(MethodView):
     def get(self):
         categorias = Categoria.query.all()
         if not categorias:
-            return EmptyDataSchema().build()
+            return jsonify({}), OK.value
 
         return jsonify(CategoriaSchema(many=True).dump(categorias)), OK.value
 

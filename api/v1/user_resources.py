@@ -53,11 +53,6 @@ class LoginView(MethodView):
         return jsonify(access_token=access_token), 200
 
 
-class ChangePasswordView(MethodView):
-    def post(self):
-        pass
-
-
 class UserView(MethodView):
     @jwt_required
     def get(self):
@@ -70,7 +65,47 @@ class UserView(MethodView):
 
     # @jwt_required
     def post(self):
-        pass
+        data = request.get_json()
+
+        if not data:
+            return EmptyDataSchema().build()
+
+        try:
+            new_user = UserSchema().load(data)
+        except ValidationError as err:
+            return UserValidationErrorSchema().build(err.message)
+
+        role_ids = new_user['role_ids']
+
+        new_user['password'] = generate_password_hash(new_user['password'])
+
+        user = User(**UserSchema().dump(new_user))
+
+        try:
+            db.session.add(user)
+            db.session.commit()
+        except Exception as e:
+            print(e)
+            db.session.rollback()
+            return InternalServerErrorSchema().build("Database Error")
+
+        if role_ids:
+            user.roles = []
+            for role_id in role_ids:
+                role = Role.query.get(role_id)
+                user.roles.append(role)
+
+        try:
+            db.session.commit()
+        except Exception as e:
+            print(e)
+            db.session.rollback()
+            return InternalServerErrorSchema().build("database Error")
+
+        return UserSchema().build(
+            UserSchema(exclude=('password',)).dump(user)
+        )
+
 
     # @jwt_required
     def put(self, user_id):
@@ -91,7 +126,7 @@ class UserView(MethodView):
         except ValidationError as err:
             return UserValidationErrorSchema().build(err.message)
 
-        roles_ids = new_user.get('role_ids', None)
+        role_ids = new_user.get('role_ids', None)
 
         new_user['password'] = user.password
         if 'new_password' in new_user:
@@ -101,9 +136,9 @@ class UserView(MethodView):
 
         user.update(**new_user)
 
-        if roles_ids:
+        if role_ids:
             user.roles = []
-            for role_id in roles_ids:
+            for role_id in role_ids:
                 role = Role.query.get(role_id)
                 user.roles.append(role)
 
@@ -112,6 +147,7 @@ class UserView(MethodView):
         except Exception as e:
             db.session.rollback()
             return InternalServerErrorSchema().build("Database error")
+
         return UserSchema().build(
             UserSchema(exclude=('password',)).dump(user)
         )

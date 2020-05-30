@@ -151,3 +151,21 @@ class UserView(MethodView):
         return UserSchema().build(
             UserSchema(exclude=('password',)).dump(user)
         )
+
+    @jwt_required
+    def delete(self, user_id):
+        user_id = int(user_id)
+
+        user = User.query.get(user_id)
+        if not user:
+            return UserNotFoundSchema().build()
+
+        try:
+            db.session.delete(user)
+            db.session.commit()
+        except Exception as e:
+            print(e)
+            db.session.rollback()
+            return InternalServerErrorSchema().build("Database Error")
+
+        return jsonify({}), OK.value

@@ -86,9 +86,6 @@ class UserView(MethodView):
         if not user:
             return UserNotFoundSchema().build()
 
-        error = UserSchema().validate(data)
-        if error:
-            return UserValidationErrorSchema().build(error)
         try:
             new_user = UserSchema().load(data)
         except ValidationError as err:

@@ -17,6 +17,9 @@ from api.models import Categoria, Noticia
 class CategoriasView(MethodView):
     def get(self):
         categorias = Categoria.query.all()
+        if not categorias:
+            return EmptyDataSchema().build()
+
         return jsonify(CategoriaSchema(many=True).dump(categorias)), OK.value
 
     def post(self):

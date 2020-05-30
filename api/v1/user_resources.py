@@ -63,7 +63,7 @@ class UserView(MethodView):
         ), 200
         # dados do usuario (protegido) usa o jwt_token para pegar o username
 
-    # @jwt_required
+    @jwt_required
     def post(self):
         data = request.get_json()
 
@@ -107,7 +107,7 @@ class UserView(MethodView):
         )
 
 
-    # @jwt_required
+    @jwt_required
     def put(self, user_id):
         user_id = int(user_id)
         new_user = None

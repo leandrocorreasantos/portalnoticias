@@ -120,7 +120,7 @@ class UserView(MethodView):
 
         if not data or user_id is None:
             return EmptyDataSchema().build()
-
+        # @TODO: trocar por user.query.one(user_id)
         user = User.query.filter(User.id == user_id).first()
 
         if not user:
@@ -151,6 +151,7 @@ class UserView(MethodView):
             db.session.commit()
         except Exception as e:
             db.session.rollback()
+            log.error("Error during update user: {}".format(e))
             return InternalServerErrorSchema().build("Database error")
 
         return UserSchema().build(
@@ -170,8 +171,8 @@ class UserView(MethodView):
             db.session.delete(user)
             db.session.commit()
         except Exception as e:
-            log.info("Database Error: {}".format(e))
             db.session.rollback()
-            return InternalServerErrorSchema().build("Database Error")
+            log.error("Database Error: {}".format(e))
+            return InternalServerErrorSchema().build()
 
         return jsonify({}), OK.value

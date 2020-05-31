@@ -1,98 +1,32 @@
-from http.client import (
-    OK, UNAUTHORIZED
-)
+from http.client import OK
 from flask import jsonify, request
 from flask.views import MethodView
 from marshmallow import ValidationError
-from werkzeug.security import generate_password_hash, check_password_hash
-from flask_jwt_extended import (
-    create_access_token, jwt_required, get_jwt_identity,
-    get_jwt_claims
-)
-from api import log, db, jwt
+from api import log, db
 from api.v1.schema import (
     InternalServerErrorSchema,
     EmptyDataSchema,
-    UserSchema,
+    UserSchema, RoleSchema,
     UserValidationErrorSchema,
+    RoleValidationSchema,
     UserNotFoundSchema,
+    RoleNotFoundSchema
 )
-from api.models import User, Role
-from api.utils import restrict_access
+from api.models import User, Role, UserRoles
 
-
-@jwt.user_claims_loader
-def add_claims_to_access_token(username):
-    ''' save the user role on jwt token '''
-    user = User.query.filter(
-        User.username == username
-    ).first()
-    roles = []
-    for role in user.roles:
-        roles.append(role.name)
-    return {'roles': roles}
 
 
 class LoginView(MethodView):
     def post(self):
+
         # faz login e gera o token jwt
-        data = request.get_json()
-        if not data:
-            return EmptyDataSchema().build()
-
-        username = data.get('username')
-        password = data.get('password')
-        if not username and not password:
-            return EmptyDataSchema().build()
-
-        user = User.query.filter(
-            User.username == username
-        ).first()
-
-        if not check_password_hash(user.password, password):
-            return jsonify(
-                {'error': 'User or password are incorrect'}
-            ), UNAUTHORIZED.value
-
-        access_token = create_access_token(identity=username)
-        return jsonify(access_token=access_token), OK.value
 
 
-class UserView(MethodView):
-    @jwt_required
-    def get(self):
-        current_user = get_jwt_identity()
-        return jsonify(
-            logged_in_as=current_user,
-            roles=get_jwt_claims()['roles']
-        ), OK.value
-
-    @jwt_required
-    @restrict_access(['editor', 'jornalista'])
+class RegisterView(MethodView):
     def post(self):
-        data = request.get_json()
+        pass
+        # registra novo usuario
 
-        if not data:
-            return EmptyDataSchema().build()
-
-        try:
-            new_user = UserSchema().load(data)
-        except ValidationError as err:
-            return UserValidationErrorSchema().build(err.message)
-
-        role_ids = new_user['role_ids']
-
-        new_user['password'] = generate_password_hash(new_user['password'])
-
-        user = User(**UserSchema().dump(new_user))
-
-        try:
-            db.session.add(user)
-            db.session.commit()
-        except Exception as e:
-            print(e)
-            db.session.rollback()
-            return InternalServerErrorSchema().build("Database Error")
 
         if role_ids:
             user.roles = []
@@ -158,6 +92,8 @@ class UserView(MethodView):
             UserSchema(exclude=('password',)).dump(user)
         )
 
+
+class UserView(MethodView):
     @jwt_required
     @restrict_access(['admin'])
     def delete(self, user_id):

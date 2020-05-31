@@ -13,11 +13,11 @@ from marshmallow import Schema, fields, validate
 class DefaultSchema(Schema):
 
     @classmethod
-    def build(cls, data):
+    def build(self, data):
         return jsonify(cls().dump(data)), OK.value
 
     @classmethod
-    def created(cls, data):
+    def created(self, data):
         return jsonify(cls().dump(data)), CREATED.value
 
 
@@ -41,35 +41,25 @@ class NoticiaSchema(DefaultSchema):
 
 
 class UserSchema(DefaultSchema):
-
-    class Meta:
-        model = 'User'
-        unknown = 'EXCLUDE'
-
     id = fields.Integer()
     username = fields.String(validate=validate.Length(max=100, min=3))
-    new_password = fields.String(
-        load_only=True,
-        validate=validate.Length(min=6, max=255)
-    )
     password = fields.String(
-        validate=validate.Length(min=6, max=255)
+        load_only=True,
+        validate=validate.Length(min=6,max=255)
     )
     active = fields.Boolean(default=False)
     email = fields.String()
+    # email_confirmed_at = fields.DateTime()
     first_name = fields.String()
     last_name = fields.String()
-    roles = fields.List(fields.Nested('RoleSchema'), dump_only=True)
-    role_ids = fields.List(fields.Int(), load_only=True)
+    roles = fields.List(fields.Nested('RoleSchema'))
 
 
 class RoleSchema(DefaultSchema):
     id = fields.String()
     name = fields.String()
 
-
 # ERROR MESSAGES
-
 
 class InternalServerErrorSchema(Schema):
     message = fields.String(default="Internal Server Error")

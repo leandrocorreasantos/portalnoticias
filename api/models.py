@@ -5,7 +5,15 @@ from datetime import datetime
 from werkzeug.security import generate_password_hash
 
 
-class User(db.Model):
+class BaseModel:
+
+    def update(self, **kwargs):
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+
+
+class User(db.Model, BaseModel):
     __tablename__ = 'users'
 
     def __init__(self, **kwargs):
@@ -30,20 +38,15 @@ class User(db.Model):
     def set_password(self, password):
         self.password = generate_password_hash(password)
 
-    def update(self, **kwargs):
-        for key, value in kwargs.items():
-            if hasattr(self, key):
-                setattr(self, key, value)
 
-
-class Role(db.Model):
+class Role(db.Model, BaseModel):
     __tablename__ = 'roles'
 
     id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     name = db.Column(db.String(50), unique=True)
 
 
-class UserRoles(db.Model):
+class UserRoles(db.Model, BaseModel):
     __tablename__ = 'user_roles'
 
     id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
@@ -55,7 +58,7 @@ class UserRoles(db.Model):
     ))
 
 
-class Categoria(db.Model):
+class Categoria(db.Model, BaseModel):
     __tablename__ = 'categorias'
 
     id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
@@ -66,7 +69,7 @@ class Categoria(db.Model):
         return slugify(self.nome)
 
 
-class Noticia(db.Model):
+class Noticia(db.Model, BaseModel):
     __tablename__ = 'noticias'
 
     id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)

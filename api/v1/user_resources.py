@@ -1,4 +1,6 @@
-from http.client import OK
+from http.client import (
+    OK, UNAUTHORIZED
+)
 from flask import jsonify, request
 from flask.views import MethodView
 from marshmallow import ValidationError
@@ -11,18 +13,19 @@ from api import log, db, jwt
 from api.v1.schema import (
     InternalServerErrorSchema,
     EmptyDataSchema,
-    UserSchema, RoleSchema,
+    UserSchema,
     UserValidationErrorSchema,
     UserNotFoundSchema,
 )
-from api.models import User, Role, UserRoles
+from api.models import User, Role
+from api.utils import restrict_access
 
 
 @jwt.user_claims_loader
 def add_claims_to_access_token(username):
     ''' save the user role on jwt token '''
     user = User.query.filter(
-        User.username==username
+        User.username == username
     ).first()
     roles = []
     for role in user.roles:
@@ -43,14 +46,16 @@ class LoginView(MethodView):
             return EmptyDataSchema().build()
 
         user = User.query.filter(
-            User.username==username
+            User.username == username
         ).first()
 
         if not check_password_hash(user.password, password):
-            return jsonify({'error': 'User or password are incorrect'}), 401
+            return jsonify(
+                {'error': 'User or password are incorrect'}
+            ), UNAUTHORIZED.value
 
         access_token = create_access_token(identity=username)
-        return jsonify(access_token=access_token), 200
+        return jsonify(access_token=access_token), OK.value
 
 
 class UserView(MethodView):
@@ -60,10 +65,10 @@ class UserView(MethodView):
         return jsonify(
             logged_in_as=current_user,
             roles=get_jwt_claims()['roles']
-        ), 200
-        # dados do usuario (protegido) usa o jwt_token para pegar o username
+        ), OK.value
 
     @jwt_required
+    @restrict_access(['editor', 'jornalista'])
     def post(self):
         data = request.get_json()
 
@@ -106,8 +111,8 @@ class UserView(MethodView):
             UserSchema(exclude=('password',)).dump(user)
         )
 
-
     @jwt_required
+    @restrict_access(['editor', 'jornalista'])
     def put(self, user_id):
         user_id = int(user_id)
         new_user = None
@@ -116,7 +121,7 @@ class UserView(MethodView):
         if not data or user_id is None:
             return EmptyDataSchema().build()
 
-        user = User.query.filter(User.id==user_id).first()
+        user = User.query.filter(User.id == user_id).first()
 
         if not user:
             return UserNotFoundSchema().build()
@@ -153,6 +158,7 @@ class UserView(MethodView):
         )
 
     @jwt_required
+    @restrict_access(['admin'])
     def delete(self, user_id):
         user_id = int(user_id)
 
@@ -164,7 +170,7 @@ class UserView(MethodView):
             db.session.delete(user)
             db.session.commit()
         except Exception as e:
-            print(e)
+            log.info("Database Error: {}".format(e))
             db.session.rollback()
             return InternalServerErrorSchema().build("Database Error")
 

@@ -44,16 +44,16 @@ class UserSchema(DefaultSchema):
 
     class Meta:
         model = 'User'
-        unknown='EXCLUDE'
+        unknown = 'EXCLUDE'
 
     id = fields.Integer()
     username = fields.String(validate=validate.Length(max=100, min=3))
     new_password = fields.String(
         load_only=True,
-        validate=validate.Length(min=6,max=255)
+        validate=validate.Length(min=6, max=255)
     )
     password = fields.String(
-        validate=validate.Length(min=6,max=255)
+        validate=validate.Length(min=6, max=255)
     )
     active = fields.Boolean(default=False)
     email = fields.String()
@@ -67,7 +67,9 @@ class RoleSchema(DefaultSchema):
     id = fields.String()
     name = fields.String()
 
+
 # ERROR MESSAGES
+
 
 class InternalServerErrorSchema(Schema):
     message = fields.String(default="Internal Server Error")

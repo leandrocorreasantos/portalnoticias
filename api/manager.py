@@ -1,6 +1,5 @@
 import sys
 import errno
-from datetime import datetime
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 from werkzeug.security import generate_password_hash

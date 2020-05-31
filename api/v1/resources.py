@@ -7,7 +7,7 @@ from api.v1.schema import (
     InternalServerErrorSchema,
     CategoriaSchema, NoticiaSchema,
     CategoriaValidationErrorSchema,
-    CategoriaNotFoundSchema,
+    # CategoriaNotFoundSchema,
     NoticiaValidationErrorSchema,
     EmptyDataSchema,
 )
@@ -28,7 +28,7 @@ class CategoriasView(MethodView):
             return EmptyDataSchema().build()
 
         try:
-           categoria = CategoriaSchema().load(data)
+            categoria = CategoriaSchema().load(data)
         except ValidationError as err:
             return CategoriaValidationErrorSchema().build(err.messages)
 
@@ -47,13 +47,12 @@ class NoticiasView(MethodView):
         noticias = Noticia.query.all()
         return jsonify(NoticiaSchema(many=True).dump(noticias)), OK.value
 
-
     def post(self):
         data = request.get_json()
         try:
             noticia = NoticiaSchema.load(data)
         except ValidationError:
-            return NoticiaValidationError().build()
+            return NoticiaValidationErrorSchema().build()
 
         try:
             db.session.add(noticia)
@@ -61,6 +60,4 @@ class NoticiasView(MethodView):
         except Exception as e:
             log.error("Erro ao cadastrar notícia: {}".format(e))
 
-        return NoticiaSchema().build(new_noticia)
-
-
+        return NoticiaSchema().build(noticia)

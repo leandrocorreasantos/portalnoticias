@@ -63,7 +63,7 @@ class RoleSchema(DefaultSchema):
 
 class InternalServerErrorSchema(Schema):
     message = fields.String(default="Internal Server Error")
-    code = fields.Integer(default=INTERNAL_SERVER_ERROR.value)
+    code = fields.Integer(default=INTERNAL_SERVER_ERROR)
     description = fields.String(default="Internal Server Error")
 
     @classmethod

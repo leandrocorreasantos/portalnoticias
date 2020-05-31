@@ -1,6 +1,7 @@
-import json
+# import json
 import unittest
 from api.app import application
+
 
 class TestCategorias(unittest.TestCase):
 

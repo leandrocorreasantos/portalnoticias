@@ -2,10 +2,14 @@
 from api import db
 from slugify import slugify
 from datetime import datetime
+from werkzeug.security import generate_password_hash
 
 
 class User(db.Model):
     __tablename__ = 'users'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     active = db.Column(
@@ -14,12 +18,22 @@ class User(db.Model):
     username = db.Column(db.String(100), nullable=False, unique=True)
     password = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(255), nullable=False, unique=True)
-    # email_confirmed_at = db.Column(db.DateTime())
     # User information
     first_name = db.Column(db.String(100), nullable=False, server_default='')
     last_name = db.Column(db.String(100), nullable=False, server_default='')
     # Define the relationship to Role via UserRoles
-    roles = db.relationship('Role', secondary='user_roles')
+    roles = db.relationship(
+        'Role', secondary='user_roles',
+        backref='roles', lazy=True
+    )
+
+    def set_password(self, password):
+        self.password = generate_password_hash(password)
+
+    def update(self, **kwargs):
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
 
 
 class Role(db.Model):

@@ -37,7 +37,7 @@ class CategoriasView(MethodView):
             log.error("Error during add categoria: {}".format(e))
             return InternalServerErrorSchema().build("Database Error")
 
-        return CategoriaSchema().build(categoria)
+        return CategoriaSchema().created(categoria)
 
     def put(self, categoria_id):
         data = request.get_json()

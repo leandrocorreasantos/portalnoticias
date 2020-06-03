@@ -13,11 +13,11 @@ from marshmallow import Schema, fields, validate
 class DefaultSchema(Schema):
 
     @classmethod
-    def build(self, data):
+    def build(cls, data):
         return jsonify(cls().dump(data)), OK.value
 
     @classmethod
-    def created(self, data):
+    def created(cls, data):
         return jsonify(cls().dump(data)), CREATED.value
 
 

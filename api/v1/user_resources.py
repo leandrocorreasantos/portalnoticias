@@ -120,8 +120,7 @@ class UserView(MethodView):
 
         if not data or user_id is None:
             return EmptyDataSchema().build()
-        # @TODO: trocar por user.query.one(user_id)
-        user = User.query.filter(User.id == user_id).first()
+        user = User.query.get(user_id)
 
         if not user:
             return UserNotFoundSchema().build()

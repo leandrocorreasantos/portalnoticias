@@ -13,11 +13,11 @@ from marshmallow import Schema, fields, validate
 class DefaultSchema(Schema):
 
     @classmethod
-    def build(self, data):
+    def build(cls, data):
         return jsonify(cls().dump(data)), OK.value
 
     @classmethod
-    def created(self, data):
+    def created(cls, data):
         return jsonify(cls().dump(data)), CREATED.value
 
 
@@ -44,7 +44,7 @@ class UserSchema(DefaultSchema):
     id = fields.Integer()
     username = fields.String(validate=validate.Length(max=100, min=3))
     password = fields.String(
-        load_only=True,
+        # load_only=True,
         validate=validate.Length(min=6,max=255)
     )
     active = fields.Boolean(default=False)
@@ -53,6 +53,7 @@ class UserSchema(DefaultSchema):
     first_name = fields.String()
     last_name = fields.String()
     roles = fields.List(fields.Nested('RoleSchema'))
+    role_ids = fields.List(fields.Integer(), load_only=True)
 
 
 class RoleSchema(DefaultSchema):

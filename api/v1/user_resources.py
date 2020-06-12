@@ -1,5 +1,5 @@
 from http.client import (
-    OK, UNAUTHORIZED
+    OK, UNAUTHORIZED, CREATED
 )
 from flask import jsonify, request
 from flask.views import MethodView
@@ -38,11 +38,13 @@ class LoginView(MethodView):
         # faz login e gera o token jwt
         data = request.get_json()
         if not data:
+            log.error('no data')
             return EmptyDataSchema().build()
 
         username = data.get('username')
         password = data.get('password')
         if not username and not password:
+            log.error('no username or password')
             return EmptyDataSchema().build()
 
         user = User.query.filter(
@@ -50,6 +52,7 @@ class LoginView(MethodView):
         ).first()
 
         if not check_password_hash(user.password, password):
+            log.error('diff password')
             return jsonify(
                 {'error': 'User or password are incorrect'}
             ), UNAUTHORIZED.value
@@ -68,7 +71,7 @@ class UserView(MethodView):
         ), OK.value
 
     @jwt_required
-    @restrict_access(['editor', 'jornalista'])
+    @restrict_access(['admin', 'editor', 'jornalista'])
     def post(self):
         data = request.get_json()
 
@@ -78,7 +81,8 @@ class UserView(MethodView):
         try:
             new_user = UserSchema().load(data)
         except ValidationError as err:
-            return UserValidationErrorSchema().build(err.message)
+            log.error(err)
+            return UserValidationErrorSchema().build(err)
 
         role_ids = new_user['role_ids']
 
@@ -89,8 +93,9 @@ class UserView(MethodView):
         try:
             db.session.add(user)
             db.session.commit()
+            db.session.flush()
         except Exception as e:
-            print(e)
+            log.error(e)
             db.session.rollback()
             return InternalServerErrorSchema().build("Database Error")
 
@@ -103,16 +108,16 @@ class UserView(MethodView):
         try:
             db.session.commit()
         except Exception as e:
-            print(e)
+            log.error(e)
             db.session.rollback()
             return InternalServerErrorSchema().build("database Error")
 
-        return UserSchema().build(
+        return UserSchema().created(
             UserSchema(exclude=('password',)).dump(user)
         )
 
     @jwt_required
-    @restrict_access(['editor', 'jornalista'])
+    @restrict_access(['admin' ,'editor', 'jornalista'])
     def put(self, user_id):
         user_id = int(user_id)
         new_user = None

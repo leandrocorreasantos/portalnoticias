@@ -1,6 +1,5 @@
 import json
 import unittest
-from unittest import mock
 from http.client import (
     BAD_REQUEST, CREATED, OK, METHOD_NOT_ALLOWED
 )

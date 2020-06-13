@@ -4,7 +4,7 @@ from datetime import datetime
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 
-from api import app, db
+from api import app, db, log
 from api.models import Role, User
 
 
@@ -24,7 +24,7 @@ def seed():
 
     for role in roles:
         try:
-            db.session.add(Role(role))
+            db.session.add(Role(**role))
             db.session.commit()
         except Exception as e:
             print("Erro ao cadastrar grupo: {}".format(e))
@@ -38,6 +38,12 @@ def seed():
         "last_name": "admin",
         "roles": [{"id": 1, "nome": "admin"}],
     }
+
+    try:
+        db.session.add(User(**user))
+        db.session.commit()
+    except Exception as e:
+        log.error("Erro ao adicionar usuario")
 
 
 if __name__ == '__main__':

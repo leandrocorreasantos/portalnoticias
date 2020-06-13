@@ -27,7 +27,7 @@ def seed():
             db.session.add(Role(**role))
             db.session.commit()
         except Exception as e:
-            print("Erro ao cadastrar grupo: {}".format(e))
+            log.error("Erro ao cadastrar grupo: {}".format(e))
 
     user = {
         "id": 1,
@@ -36,18 +36,18 @@ def seed():
         "email": "admin@localhost",
         "first_name": "admin",
         "last_name": "admin",
-        "roles": [{"id": 1, "nome": "admin"}],
+        "role_ids": [1],
     }
 
     try:
         db.session.add(User(**user))
         db.session.commit()
     except Exception as e:
-        log.error("Erro ao adicionar usuario")
+        log.error("Erro ao adicionar usuario: {}".format(e))
 
 
 if __name__ == '__main__':
     if not app.debug:
-        print('App is in production mode. Migration skipped')
+        log.error('App is in production mode. Migration skipped')
         sys.exit(errno.EACCES)
     manager.run()

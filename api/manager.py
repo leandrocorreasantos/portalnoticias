@@ -29,6 +29,8 @@ def seed():
         except Exception as e:
             log.error("Erro ao cadastrar grupo: {}".format(e))
 
+    admin = Role.query.get(1)
+
     user = {
         "id": 1,
         "username": "admin",
@@ -36,7 +38,7 @@ def seed():
         "email": "admin@localhost",
         "first_name": "admin",
         "last_name": "admin",
-        "role_ids": [1],
+        "roles": [admin]
     }
 
     try:

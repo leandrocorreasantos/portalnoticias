@@ -2,10 +2,22 @@
 from api import db
 from slugify import slugify
 from datetime import datetime
+from werkzeug.security import generate_password_hash
 
 
-class User(db.Model):
+class BaseModel:
+
+    def update(self, **kwargs):
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+
+
+class User(db.Model, BaseModel):
     __tablename__ = 'users'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     active = db.Column(
@@ -14,22 +26,27 @@ class User(db.Model):
     username = db.Column(db.String(100), nullable=False, unique=True)
     password = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(255), nullable=False, unique=True)
-    # email_confirmed_at = db.Column(db.DateTime())
     # User information
     first_name = db.Column(db.String(100), nullable=False, server_default='')
     last_name = db.Column(db.String(100), nullable=False, server_default='')
     # Define the relationship to Role via UserRoles
-    roles = db.relationship('Role', secondary='user_roles')
+    roles = db.relationship(
+        'Role', secondary='user_roles',
+        backref='roles', lazy=True
+    )
+
+    def set_password(self, password):
+        self.password = generate_password_hash(password)
 
 
-class Role(db.Model):
+class Role(db.Model, BaseModel):
     __tablename__ = 'roles'
 
     id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     name = db.Column(db.String(50), unique=True)
 
 
-class UserRoles(db.Model):
+class UserRoles(db.Model, BaseModel):
     __tablename__ = 'user_roles'
 
     id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
@@ -41,7 +58,7 @@ class UserRoles(db.Model):
     ))
 
 
-class Categoria(db.Model):
+class Categoria(db.Model, BaseModel):
     __tablename__ = 'categorias'
 
     id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
@@ -52,7 +69,7 @@ class Categoria(db.Model):
         return slugify(self.nome)
 
 
-class Noticia(db.Model):
+class Noticia(db.Model, BaseModel):
     __tablename__ = 'noticias'
 
     id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)

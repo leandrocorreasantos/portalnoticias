@@ -16,18 +16,18 @@ manager.add_command('db', MigrateCommand)
 
 @manager.command
 def seed():
-    roles = [
-        {"id": 1, "name": "admin"},
-        {"id": 2, "name": "editor"},
-        {"id": 3, "name": "jornalista"},
-    ]
+    # roles = [
+    #     {"id": 1, "name": "admin"},
+    #     {"id": 2, "name": "editor"},
+    #     {"id": 3, "name": "jornalista"},
+    # ]
 
-    for role in roles:
-        try:
-            db.session.add(Role(**role))
-            db.session.commit()
-        except Exception as e:
-            log.error("Erro ao cadastrar grupo: {}".format(e))
+    # for role in roles:
+    #     try:
+    #         db.session.add(Role(**role))
+    #         db.session.commit()
+    #     except Exception as e:
+    #         log.error("Erro ao cadastrar grupo: {}".format(e))
 
     admin = Role.query.get(1)
 

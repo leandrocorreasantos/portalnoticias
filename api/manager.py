@@ -3,6 +3,7 @@ import errno
 from datetime import datetime
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
+from werkzeug.security import generate_password_hash
 
 from api import app, db, log
 from api.models import Role, User
@@ -16,25 +17,25 @@ manager.add_command('db', MigrateCommand)
 
 @manager.command
 def seed():
-    # roles = [
-    #     {"id": 1, "name": "admin"},
-    #     {"id": 2, "name": "editor"},
-    #     {"id": 3, "name": "jornalista"},
-    # ]
+    roles = [
+        {"id": 1, "name": "admin"},
+        {"id": 2, "name": "editor"},
+        {"id": 3, "name": "jornalista"},
+    ]
 
-    # for role in roles:
-    #     try:
-    #         db.session.add(Role(**role))
-    #         db.session.commit()
-    #     except Exception as e:
-    #         log.error("Erro ao cadastrar grupo: {}".format(e))
+    for role in roles:
+        try:
+            db.session.add(Role(**role))
+            db.session.commit()
+        except Exception as e:
+            log.error("Erro ao cadastrar grupo: {}".format(e))
 
     admin = Role.query.get(1)
 
     user = {
         "id": 1,
         "username": "admin",
-        "password": "12345678",
+        "password": generate_password_hash("12345678"),
         "email": "admin@localhost",
         "first_name": "admin",
         "last_name": "admin",

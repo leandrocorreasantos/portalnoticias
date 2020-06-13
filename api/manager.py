@@ -17,9 +17,9 @@ manager.add_command('db', MigrateCommand)
 @manager.command
 def seed():
     roles = [
-        {"id": 1, "nome": "admin"},
-        {"id": 1, "nome": "editor"},
-        {"id": 1, "nome": "jornalista"},
+        {"id": 1, "name": "admin"},
+        {"id": 1, "name": "editor"},
+        {"id": 1, "name": "jornalista"},
     ]
 
     for role in roles:

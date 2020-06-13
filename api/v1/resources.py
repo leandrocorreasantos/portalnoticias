@@ -37,20 +37,23 @@ class CategoriasView(MethodView):
             log.error("Error during add categoria: {}".format(e))
             return InternalServerErrorSchema().build("Database Error")
 
-        return CategoriaSchema().build(categoria)
+        return CategoriaSchema().created(categoria)
 
     def put(self, categoria_id):
+        categoria_id = int(categoria_id)
         data = request.get_json()
         if not data or categoria_id is None:
             return EmptyDataSchema().build()
 
         categoria = Categoria.query.get(categoria_id)
         if not categoria:
+            log.error('Categoria not found')
             return CategoriaNotFoundSchema().build()
 
         try:
             new_categoria = CategoriaSchema().load(data)
         except ValidationError as err:
+            log.error('Error while validate Categoria: {}'.format(err))
             return CategoriaValidationErrorSchema().build(err.message)
 
         categoria.update(**new_categoria)

@@ -4,7 +4,8 @@ from datetime import datetime
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 
-from api import app, db
+
+from api import app, db, log
 from api.models import Role, User
 
 
@@ -40,6 +41,13 @@ def seed():
     }
 
 
+    try:
+        db.session.add(User(**user))
+        db.session.commit()
+    except Exception as e:
+        log.error("Erro ao adicionar usuario")
+
+        
 if __name__ == '__main__':
     if not app.debug:
         print('App is in production mode. Migration skipped')

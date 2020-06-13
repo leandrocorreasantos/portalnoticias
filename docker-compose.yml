@@ -22,8 +22,16 @@ services:
             POSTGRES_USER: 'portalnoticias'
             POSTGRES_PASSWORD: 'db_password'
 
+    dbtest:
+        image: postgres
+        ports:
+            - "5434:5432"
+        environment:
+            POSTGRES_DB: 'test_portalnoticias'
+            POSTGRES_USER: 'portalnoticias'
+            POSTGRES_PASSWORD: 'db_password'
+
     adminer:
         image: adminer
-        restart: always
         ports:
             - "8081:8080"

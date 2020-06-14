@@ -6,7 +6,7 @@ from flask_migrate import Migrate, MigrateCommand
 from werkzeug.security import generate_password_hash
 
 from api import app, db, log
-from api.models import Role, User
+from api.models import Role, User, Categoria, Noticia
 
 
 migrate = Migrate(app, db)
@@ -34,6 +34,13 @@ def seed():
         {"id": 2, "titulo": "noticia 2", "conteudo": "lorem ipsum dolor"},
         {"id": 3, "titulo": "noticia 3", "conteudo": "lorem ipsum dolor"},
     ]
+
+    for noticia in noticias:
+        try:
+            db.session.add(Noticia(**noticia))
+            db.sssion.commit()
+        except Exception as e:
+            log.error("Erro ao cadastrar noticia: {}".format(e))
 
     roles = [
         {"id": 1, "name": "admin"},

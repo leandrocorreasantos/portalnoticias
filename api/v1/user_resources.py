@@ -116,8 +116,8 @@ class UserView(MethodView):
             UserSchema(exclude=('password',)).dump(user)
         )
 
-    @jwt_required
-    @restrict_access(['admin' ,'editor', 'jornalista'])
+    # @jwt_required
+    # @restrict_access(['admin' ,'editor', 'jornalista'])
     def put(self, user_id):
         user_id = int(user_id)
         new_user = None

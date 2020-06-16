@@ -49,7 +49,6 @@ class UserSchema(DefaultSchema):
     )
     active = fields.Boolean(default=False)
     email = fields.String()
-    # email_confirmed_at = fields.DateTime()
     first_name = fields.String()
     last_name = fields.String()
     roles = fields.List(fields.Nested('RoleSchema'))
@@ -85,8 +84,6 @@ class EmptyDataSchema(Schema):
 
 
 # NOT FOUND
-
-
 class NotFoundSchema(Schema):
     message = fields.String(default="Not Found")
     code = fields.Integer(default=NOT_FOUND)
@@ -114,8 +111,6 @@ class RoleNotFoundSchema(NotFoundSchema):
 
 
 # VALIDATION ERROR
-
-
 class ValidationErrorSchema(Schema):
 
     @classmethod

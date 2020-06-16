@@ -84,33 +84,21 @@ class UserView(MethodView):
             log.error(err)
             return UserValidationErrorSchema().build(err)
 
-        role_ids = new_user['role_ids']
-
         new_user['password'] = generate_password_hash(new_user['password'])
 
         user = User(**UserSchema().dump(new_user))
+        if new_user['role_ids']:
+            user.roles = []
+            for role_id in new_user['role_ids']:
+                user.roles.append(Role.query.get(role_id))
 
         try:
             db.session.add(user)
             db.session.commit()
-            db.session.flush()
         except Exception as e:
             log.error(e)
             db.session.rollback()
             return InternalServerErrorSchema().build("Database Error")
-
-        if role_ids:
-            user.roles = []
-            for role_id in role_ids:
-                role = Role.query.get(role_id)
-                user.roles.append(role)
-
-        try:
-            db.session.commit()
-        except Exception as e:
-            log.error(e)
-            db.session.rollback()
-            return InternalServerErrorSchema().build("database Error")
 
         return UserSchema().created(
             UserSchema(exclude=('password',)).dump(user)

@@ -2,7 +2,8 @@
 from api import db
 from slugify import slugify
 from datetime import datetime
-from werkzeug.security import generate_password_hash
+from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 class BaseModel:
@@ -37,6 +38,9 @@ class User(db.Model, BaseModel):
 
     def set_password(self, password):
         self.password = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
 
 
 class Role(db.Model, BaseModel):
@@ -73,6 +77,9 @@ class Noticia(db.Model, BaseModel):
     __tablename__ = 'noticias'
 
     id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    categoria_id = db.Column(db.BigInteger(),
+        db.ForeignKey('categorias.id', ondelete='SET NULL')
+    )
     titulo = db.Column(db.String(255), nullable=False)
     conteudo = db.Column(db.Text)
     publicado = db.Column(db.Boolean(), server_default='0')

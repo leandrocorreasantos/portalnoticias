@@ -127,9 +127,8 @@ class UserView(MethodView):
 
         role_ids = new_user.get('role_ids', None)
 
-        new_user['password'] = user.password
-        if 'new_password' in new_user:
-            new_user['password'] = generate_password_hash(
+        if 'password' in new_user:
+            user.password = generate_password_hash(
                 new_user['new_password']
             )
 

@@ -14,14 +14,14 @@ if os.path.isfile(dotenv_path):
     from dotenv import load_dotenv
     load_dotenv(dotenv_path)
 
-db = SQLAlchemy(app)
-jwt = JWTManager(app)
-
 app.config.from_object(os.environ.get('CONFIG_OBJECT'))
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = os.environ.get(
     'SQLALCHEMY_TRACK_MODIFICATIONS', False
 )
+
+db = SQLAlchemy(app)
+jwt = JWTManager(app)
 
 handler = logging.StreamHandler(sys.stdout)
 

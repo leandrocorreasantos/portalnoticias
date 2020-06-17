@@ -45,11 +45,10 @@ class UserSchema(DefaultSchema):
     username = fields.String(validate=validate.Length(max=100, min=3))
     password = fields.String(
         # load_only=True,
-        validate=validate.Length(min=6,max=255)
+        validate=validate.Length(min=6, max=255)
     )
     active = fields.Boolean(default=False)
     email = fields.String()
-    # email_confirmed_at = fields.DateTime()
     first_name = fields.String()
     last_name = fields.String()
     roles = fields.List(fields.Nested('RoleSchema'))
@@ -61,6 +60,7 @@ class RoleSchema(DefaultSchema):
     name = fields.String()
 
 # ERROR MESSAGES
+
 
 class InternalServerErrorSchema(Schema):
     message = fields.String(default="Internal Server Error")
@@ -85,8 +85,6 @@ class EmptyDataSchema(Schema):
 
 
 # NOT FOUND
-
-
 class NotFoundSchema(Schema):
     message = fields.String(default="Not Found")
     code = fields.Integer(default=NOT_FOUND)
@@ -114,8 +112,6 @@ class RoleNotFoundSchema(NotFoundSchema):
 
 
 # VALIDATION ERROR
-
-
 class ValidationErrorSchema(Schema):
 
     @classmethod

@@ -129,7 +129,7 @@ class UserView(MethodView):
 
         if 'password' in new_user:
             user.password = generate_password_hash(
-                new_user['new_password']
+                new_user['password']
             )
 
         user.update(**new_user)

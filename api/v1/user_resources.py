@@ -1,5 +1,5 @@
 from http.client import (
-    OK, UNAUTHORIZED, CREATED
+    OK, UNAUTHORIZED
 )
 from flask import jsonify, request
 from flask.views import MethodView
@@ -41,8 +41,8 @@ class LoginView(MethodView):
             log.error('no data')
             return EmptyDataSchema().build()
 
-        username = data.get('username')
-        password = data.get('password')
+        username = data['username']
+        password = data['password']
         if not username and not password:
             log.error('no username or password')
             return EmptyDataSchema().build()
@@ -50,6 +50,10 @@ class LoginView(MethodView):
         user = User.query.filter(
             User.username == username
         ).first()
+
+        if not user:
+            log.error('no username found')
+            return UserNotFoundSchema().build()
 
         if not check_password_hash(user.password, password):
             log.error('diff password')
@@ -105,7 +109,7 @@ class UserView(MethodView):
         )
 
     @jwt_required
-    @restrict_access(['admin' ,'editor', 'jornalista'])
+    @restrict_access(['admin', 'editor', 'jornalista'])
     def put(self, user_id):
         user_id = int(user_id)
         new_user = None

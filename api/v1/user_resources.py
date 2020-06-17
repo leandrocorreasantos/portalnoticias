@@ -142,6 +142,7 @@ class UserView(MethodView):
                 user.roles.append(role)
 
         try:
+            db.session.add(user)
             db.session.commit()
         except Exception as e:
             db.session.rollback()

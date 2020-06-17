@@ -39,7 +39,7 @@ def seed():
         "email": "admin@localhost",
         "first_name": "admin",
         "last_name": "admin",
-        "roles": [admin]
+        "roles": [{"id": 1, "name": "admin"}]
     }
 
     try:

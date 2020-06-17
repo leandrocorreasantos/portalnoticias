@@ -2,7 +2,6 @@
 from api import db
 from slugify import slugify
 from datetime import datetime
-from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
@@ -77,7 +76,8 @@ class Noticia(db.Model, BaseModel):
     __tablename__ = 'noticias'
 
     id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
-    categoria_id = db.Column(db.BigInteger(),
+    categoria_id = db.Column(
+        db.BigInteger(),
         db.ForeignKey('categorias.id', ondelete='SET NULL')
     )
     titulo = db.Column(db.String(255), nullable=False)

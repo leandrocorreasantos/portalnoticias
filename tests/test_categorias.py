@@ -1,4 +1,3 @@
-import json
 import unittest
 from http.client import (
     BAD_REQUEST, CREATED, OK, METHOD_NOT_ALLOWED
@@ -7,6 +6,7 @@ from api import db
 from api.models import Categoria
 from api.app import application
 from api.config import TestingConfig
+
 
 class TestCategorias(unittest.TestCase):
 
@@ -44,7 +44,7 @@ class TestCategorias(unittest.TestCase):
         response = self.app.put('/v1/categoria/1', json=update)
         self.assertEqual(response.status_code, OK.value)
 
-    def test_delete_categoria_without_id_should_return_method_not_allowed(self):
+    def test_delete_categoria_without_id_should_return_not_allowed(self):
         response = self.app.delete('/v1/categoria')
         self.assertEqual(response.status_code, METHOD_NOT_ALLOWED.value)
 

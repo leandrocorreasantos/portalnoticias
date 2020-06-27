@@ -131,6 +131,7 @@ class NoticiasView(MethodView):
 
     @jwt_required
     @restrict_access(['admin', 'editor', 'jornalista'])
+
     def post(self):
         data = request.get_json()
         if not data:

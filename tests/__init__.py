@@ -61,3 +61,4 @@ def create_user_and_get_headers():
     token = "Bearer {}".format(user_token['access_token'])
     headers = {'Authorization': token}
     return headers
+  

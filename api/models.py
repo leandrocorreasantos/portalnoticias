@@ -77,7 +77,9 @@ class Noticia(db.Model, BaseModel):
         db.BigInteger(),
         db.ForeignKey('categorias.id', ondelete='SET NULL')
     )
+
     categoria = db.relationship('Categoria', backref='categoria', lazy=True)
+
     titulo = db.Column(db.String(255), nullable=False)
     conteudo = db.Column(db.Text)
     publicado = db.Column(db.Boolean(), server_default='0')

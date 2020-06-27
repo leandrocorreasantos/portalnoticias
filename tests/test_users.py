@@ -66,3 +66,4 @@ def test_login_with_not_username_valid_should_return_not_found_error():
     login_data = {"username": "non_existent", "password": "123456"}
     response = app.post('/v1/user/login', json=login_data)
     assert response.status_code == NOT_FOUND.value
+

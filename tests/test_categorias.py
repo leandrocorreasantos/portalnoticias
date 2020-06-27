@@ -71,3 +71,4 @@ def test_put_data_without_header_should_return_unauthorized():
 def test_delete_categoria_without_header_should_return_unauthorized():
     response = app.delete('/v1/categoria/1')
     assert response.status_code == UNAUTHORIZED.value
+    

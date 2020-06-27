@@ -84,7 +84,7 @@ class Noticia(db.Model, BaseModel):
     conteudo = db.Column(db.Text)
     publicado = db.Column(db.Boolean(), server_default='0')
     data_publicacao = db.Column(db.DateTime(), default=datetime.now())
-    data_atualizacao = db.Column(db.DateTime(), default=datetime.now())
+    data_atualizacao = db.Column(db.DateTime(), onupdate=datetime.now())
     cliques = db.Column(db.Integer(), server_default='0')
     meta_keywords = db.Column(db.String(100))
     meta_description = db.Column(db.String(255))

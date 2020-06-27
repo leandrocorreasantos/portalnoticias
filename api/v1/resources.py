@@ -1,3 +1,4 @@
+from sqlalchemy import and_
 from datetime import datetime
 from http.client import OK
 from flask import jsonify, request
@@ -107,25 +108,28 @@ class CategoriasView(MethodView):
 class NoticiasView(MethodView):
     @jwt_optional
     def get(self, noticia_id=None):
+        filters = []
         page = request.args.get('page', 1, type=int)
         offset = request.args.get('offset', 10, type=int)
-        noticia_query = Noticia.query
 
         current_user = get_jwt_identity()
-        if not current_user:
-            noticia_query.filter(Noticia.publicado is True)
-            noticia_query.filter(Noticia.data_publicacao > datetime.now())
+        if current_user is None:
+            filters.append(Noticia.publicado.is_(True))
+            filters.append(Noticia.data_publicacao <= datetime.now())
 
         if noticia_id:
-            noticia = noticia_query.get(noticia_id)
+            filters.append(Noticia.id == noticia_id)
+            noticia = noticiaquery.filter(and_(*filters)).first()
             return jsonify(NoticiaSchema().dump(noticia)), OK.value
 
         categoria_id = request.args.get('cat', None, type=int)
 
         if categoria_id:
-            noticia_query.filter(Noticia.categoria_id == categoria_id)
+            filters.append(Noticia.categoria_id == categoria_id)
 
-        noticias = noticia_query.paginate(page, offset, False).items
+        noticias = noticia.query.filters(
+            and_(*filters)
+        ).paginate(page, offset, False).items
 
         return jsonify(NoticiaSchema(many=True).dump(noticias)), OK.value
 
@@ -142,6 +146,9 @@ class NoticiasView(MethodView):
             return NoticiaValidationErrorSchema().build(err.messages)
 
         noticia['categoria'] = Categoria.query.get(noticia['categoria_id'])
+
+        if noticia['publicado'] is True:
+            noticia['data_publicacao'] = datetime.now()
 
         try:
             db.session.add(Noticia(**noticia))

@@ -50,6 +50,9 @@ class LoginView(MethodView):
         user = User.query.filter(
             User.username == username
         ).first()
+        if not user:
+            log.error('no username found')
+            return UserNotFoundSchema().build()
 
         if not user:
             log.error('no username found')
@@ -129,13 +132,12 @@ class UserView(MethodView):
 
         role_ids = new_user.get('role_ids', None)
 
-        new_user['password'] = user.password
-        if 'new_password' in new_user:
-            new_user['password'] = generate_password_hash(
-                new_user['new_password']
-            )
-
         user.update(**new_user)
+
+        if 'password' in new_user:
+            user.password = generate_password_hash(
+                new_user['password']
+            )
 
         if role_ids:
             user.roles = []
@@ -144,6 +146,7 @@ class UserView(MethodView):
                 user.roles.append(role)
 
         try:
+            db.session.add(user)
             db.session.commit()
         except Exception as e:
             db.session.rollback()

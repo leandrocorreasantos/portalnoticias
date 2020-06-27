@@ -17,7 +17,7 @@ application.add_url_rule(
 application.add_url_rule(
     '/v1/categoria/<categoria_id>',
     view_func=v1_Categorias.as_view('categoria'),
-    methods=['PUT', 'DELETE']
+    methods=['GET', 'PUT', 'DELETE']
 )
 
 # module user
@@ -40,12 +40,19 @@ application.add_url_rule(
 )
 
 # module noticia
+
+
 application.add_url_rule(
-    '/v1/noticias',
+    '/v1/noticia',
     view_func=v1_Noticias.as_view('noticias'),
-    methods=['GET']
+    methods=['GET','POST']
 )
 
+application.add_url_rule(
+    '/v1/noticia/<noticia_id>',
+    view_func=v1_Noticias.as_view('noticia'),
+    methods=['GET', 'PUT', 'DELETE']
+)
 
 if __name__ == '__main__':
     application.run(debug=application.debug,

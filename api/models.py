@@ -16,9 +16,6 @@ class BaseModel:
 class User(db.Model, BaseModel):
     __tablename__ = 'users'
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
     id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     active = db.Column(
         'is_active', db.Boolean(), nullable=False, server_default='1'
@@ -80,6 +77,7 @@ class Noticia(db.Model, BaseModel):
         db.BigInteger(),
         db.ForeignKey('categorias.id', ondelete='SET NULL')
     )
+    categoria = db.relationship('Categoria', backref='categoria', lazy=True)
     titulo = db.Column(db.String(255), nullable=False)
     conteudo = db.Column(db.Text)
     publicado = db.Column(db.Boolean(), server_default='0')

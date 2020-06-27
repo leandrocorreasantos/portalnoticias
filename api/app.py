@@ -45,7 +45,7 @@ application.add_url_rule(
 application.add_url_rule(
     '/v1/noticia',
     view_func=v1_Noticias.as_view('noticias'),
-    methods=['GET','POST']
+    methods=['GET', 'POST']
 )
 
 application.add_url_rule(

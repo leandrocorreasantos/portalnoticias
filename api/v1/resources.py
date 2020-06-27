@@ -3,13 +3,13 @@ from http.client import OK
 from flask import jsonify, request
 from flask.views import MethodView
 from marshmallow import ValidationError
-from sqlalchemy import and_
 from api import log, db
 from api.v1.schema import (
     InternalServerErrorSchema,
     CategoriaSchema, NoticiaSchema,
     CategoriaValidationErrorSchema,
     CategoriaNotFoundSchema,
+    NoticiaNotFoundSchema,
     NoticiaValidationErrorSchema,
     EmptyDataSchema,
 )
@@ -106,7 +106,7 @@ class CategoriasView(MethodView):
 
 class NoticiasView(MethodView):
     @jwt_optional
-    def get(self, noticia_id = None):
+    def get(self, noticia_id=None):
         page = request.args.get('page', 1, type=int)
         offset = request.args.get('offset', 10, type=int)
         noticia_query = Noticia.query
@@ -117,7 +117,7 @@ class NoticiasView(MethodView):
             noticia_query.filter(Noticia.data_publicacao > datetime.now())
 
         if noticia_id:
-            noticia = Noticia_query.get(noticia_id)
+            noticia = noticia_query.get(noticia_id)
             return jsonify(NoticiaSchema().dump(noticia)), OK.value
 
         categoria_id = request.args.get('cat', None, type=int)
@@ -131,7 +131,6 @@ class NoticiasView(MethodView):
 
     @jwt_required
     @restrict_access(['admin', 'editor', 'jornalista'])
-
     def post(self):
         data = request.get_json()
         if not data:

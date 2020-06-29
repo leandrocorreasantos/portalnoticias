@@ -5,6 +5,7 @@ import logging.config
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
+from flask_cors import CORS
 
 
 app = Flask(__name__)
@@ -22,6 +23,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = os.environ.get(
 
 db = SQLAlchemy(app)
 jwt = JWTManager(app)
+CORS(app, resources={r"/v1/*": {"origins": "*"}})
 
 handler = logging.StreamHandler(sys.stdout)
 

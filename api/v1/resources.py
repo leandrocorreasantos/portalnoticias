@@ -109,6 +109,8 @@ class NoticiasView(MethodView):
     @jwt_optional
     def get(self, noticia_id=None):
         filters = []
+        noticias = []
+        noticia = None
         page = request.args.get('page', 1, type=int)
         offset = request.args.get('offset', 10, type=int)
 
@@ -119,7 +121,7 @@ class NoticiasView(MethodView):
 
         if noticia_id:
             filters.append(Noticia.id == noticia_id)
-            noticia = noticiaquery.filter(and_(*filters)).first()
+            noticia = Noticia.query.filter(and_(*filters)).first()
             return jsonify(NoticiaSchema().dump(noticia)), OK.value
 
         categoria_id = request.args.get('cat', None, type=int)
@@ -127,7 +129,7 @@ class NoticiasView(MethodView):
         if categoria_id:
             filters.append(Noticia.categoria_id == categoria_id)
 
-        noticias = noticia.query.filters(
+        noticias = Noticia.query.filter(
             and_(*filters)
         ).paginate(page, offset, False).items
 

@@ -111,6 +111,7 @@ class NoticiasView(MethodView):
         filters = []
         noticias = []
         noticia = None
+        pagination = {}
         page = request.args.get('page', 1, type=int)
         offset = request.args.get('offset', 10, type=int)
 
@@ -131,9 +132,20 @@ class NoticiasView(MethodView):
 
         noticias = Noticia.query.filter(
             and_(*filters)
-        ).paginate(page, offset, False).items
+        ).paginate(page, offset, False)
+        log.info("busca: {}".format(noticias.query.__dict__))
 
-        return jsonify(NoticiaSchema(many=True).dump(noticias)), OK.value
+        pagination = {
+            'page': noticias.page,
+            'per_page': noticias.per_page,
+            'total': noticias.total,
+            'data': NoticiaSchema(many=True).dump(noticias.items)
+        }
+
+        #log.info("noticias: {}".format(pagination))
+        # log.info("noticias: {}".format(noticias.query.__dict__))
+
+        return jsonify(pagination), OK.value
 
     @jwt_required
     @restrict_access(['admin', 'editor', 'jornalista'])
@@ -149,7 +161,7 @@ class NoticiasView(MethodView):
 
         noticia['categoria'] = Categoria.query.get(noticia['categoria_id'])
 
-        if noticia['publicado'] is True:
+        if 'publicado' in noticia and noticia['publicado'] is True:
             noticia['data_publicacao'] = datetime.now()
 
         try:

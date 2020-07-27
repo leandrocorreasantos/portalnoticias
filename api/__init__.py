@@ -32,9 +32,9 @@ if not app.debug:
 
 formater = logging.Formatter(
     '{"timestamp": "%(asctime)s",'
-    '"request_id": "%(request_id)s",'
-    '"unity": "%(unity)s",'
-    '"facility": "%(facility)s",'
+    #'"request_id": "%(request_id)s",'
+    #'"unity": "%(unity)s",'
+    #'"facility": "%(facility)s",'
     '"level": "%(levelname)s",'
     '"message": "%(message)s"}'
 )

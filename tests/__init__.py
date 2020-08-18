@@ -1,7 +1,7 @@
 import pytest
 import json
 from api import db, log
-from api.models import User, Role
+from api.models import User, Role, Categoria
 from api.app import application
 from api.config import TestingConfig
 from werkzeug.security import generate_password_hash
@@ -19,12 +19,12 @@ def create_user_and_get_headers():
     except Exception as e:
         print("Erro ao criar tabelas: {}".format(e))
 
-    categoria = {"id": 1, "nome": "foo"}
-    try:
-        db.session.add(categoria)
-        db.session.commit()
-    except Exception as e:
-        db.session.rollback()
+    # categoria = Categoria(**{"id": 1, "nome": "foo"})
+    # try:
+    #     db.session.add(categoria)
+    #     db.session.commit()
+    # except Exception as e:
+    #     db.session.rollback()
 
     admin = Role(**{"id": 1, "name": "admin"})
     jornalista = Role(**{"id": 2, "name": "jornalista"})
@@ -61,3 +61,13 @@ def create_user_and_get_headers():
     token = "Bearer {}".format(user_token['access_token'])
     headers = {'Authorization': token}
     return headers
+
+
+@pytest.fixture
+def create_categoria_from_noticia():
+    categoria = Categoria(**{"id": 1, "nome": "foo"})
+    try:
+        db.session.add(categoria)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()

@@ -63,10 +63,12 @@ class Categoria(db.Model, BaseModel):
 
     id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     nome = db.Column(db.String(100), nullable=False)
+    slug = db.Column(db.String(100), nullable=False, unique=True)
 
-    @property
-    def slug(self):
-        return slugify(self.nome)
+    def __setattr__(self, key, value):
+        super(Categoria, self).__setattr__(key, value)
+        if key == 'nome':
+            self.slug = slugify(value)
 
 
 class Noticia(db.Model, BaseModel):
@@ -81,6 +83,8 @@ class Noticia(db.Model, BaseModel):
     categoria = db.relationship('Categoria', backref='categoria', lazy=True)
 
     titulo = db.Column(db.String(255), nullable=False)
+    subtitulo = db.Column(db.String(255), nullable=True)
+    slug = db.Column(db.String(512), unique=True)
     conteudo = db.Column(db.Text)
     publicado = db.Column(db.Boolean(), server_default='0')
     data_publicacao = db.Column(db.DateTime(), default=datetime.now())
@@ -88,3 +92,12 @@ class Noticia(db.Model, BaseModel):
     cliques = db.Column(db.Integer(), server_default='0')
     meta_keywords = db.Column(db.String(100))
     meta_description = db.Column(db.String(255))
+
+    def generate_slug(self):
+        self.slug = slugify(
+            '{}-{}-{}'.format(
+                self.categoria.nome,
+                self.titulo,
+                self.id
+            )
+        )

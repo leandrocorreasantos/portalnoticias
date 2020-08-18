@@ -105,9 +105,44 @@ class CategoriasView(MethodView):
         return jsonify({}), OK.value
 
 
+class CategoriaNoticiaView(MethodView):
+    def get(self, categoria_slug):
+        categoria = {}
+        noticias = []
+        pagination = []
+        page = request.args.get('page', 1, type=int)
+        offset = request.args.get('offset', 10, type=int)
+
+        try:
+            categoria = CategoriaSchema().dump(
+                Categoria.query.filter(
+                    Categoria.slug == categoria_slug).first()
+            )
+        except Exception as e:
+            log.error("Error during find categoria: {}".format(e))
+
+        log.info("categoria: {}".format(categoria))
+
+        try:
+            noticias = Noticia.query.filter(
+                Noticia.categoria_id == categoria.get('id')
+            ).paginate(page, offset, False)
+        except Exception as e:
+            log.error("Error during find noticia: {}".format(e))
+
+        pagination = {
+            'page': noticias.page,
+            'per_page': noticias.per_page,
+            'total': noticias.total,
+            'data': NoticiaSchema(many=True).dump(noticias.items)
+        }
+
+        return jsonify(pagination), OK.value
+
+
 class NoticiasView(MethodView):
     @jwt_optional
-    def get(self, noticia_id=None):
+    def get(self, noticia_slug=None):
         filters = []
         noticias = []
         noticia = None
@@ -120,20 +155,17 @@ class NoticiasView(MethodView):
             filters.append(Noticia.publicado.is_(True))
             filters.append(Noticia.data_publicacao <= datetime.now())
 
-        if noticia_id:
-            filters.append(Noticia.id == noticia_id)
+        if noticia_slug:
+            filters.append(Noticia.slug == noticia_slug)
             noticia = Noticia.query.filter(and_(*filters)).first()
+            if noticia is None:
+                return NoticiaNotFoundSchema().build()
+
             return jsonify(NoticiaSchema().dump(noticia)), OK.value
-
-        categoria_id = request.args.get('cat', None, type=int)
-
-        if categoria_id:
-            filters.append(Noticia.categoria_id == categoria_id)
 
         noticias = Noticia.query.filter(
             and_(*filters)
         ).paginate(page, offset, False)
-        log.info("busca: {}".format(noticias.query.__dict__))
 
         pagination = {
             'page': noticias.page,
@@ -142,48 +174,66 @@ class NoticiasView(MethodView):
             'data': NoticiaSchema(many=True).dump(noticias.items)
         }
 
-        #log.info("noticias: {}".format(pagination))
-        # log.info("noticias: {}".format(noticias.query.__dict__))
-
         return jsonify(pagination), OK.value
 
     @jwt_required
     @restrict_access(['admin', 'editor', 'jornalista'])
     def post(self):
         data = request.get_json()
+        categoria = None
         if not data:
             return EmptyDataSchema().build()
 
         try:
-            noticia = NoticiaSchema().load(data)
+            loaded_data = NoticiaSchema().load(data)
         except ValidationError as err:
             return NoticiaValidationErrorSchema().build(err.messages)
 
-        noticia['categoria'] = Categoria.query.get(noticia['categoria_id'])
-
-        if 'publicado' in noticia and noticia['publicado'] is True:
-            noticia['data_publicacao'] = datetime.now()
-
         try:
-            db.session.add(Noticia(**noticia))
+            categoria = Categoria.query.get(
+                loaded_data['categoria_id']
+            )
+        except Exception as e:
+            log.error("Error during get categoria: {}".format(e))
+
+        if 'publicado' in loaded_data and loaded_data['publicado'] is True:
+            loaded_data['data_publicacao'] = datetime.now()
+
+        noticia = Noticia(**loaded_data)
+        noticia.categoria = categoria
+
+        # save noticia
+        try:
+            db.session.add(noticia)
             db.session.commit()
         except Exception as e:
             db.session.rollback()
             log.error("Error during add noticia: {}".format(e))
             return InternalServerErrorSchema().build("Database Error")
 
+        # generate slug from noticia
+        try:
+            noticia.generate_slug()
+            db.session.flush()
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            log.error("Error during generate slug from noticia: {}".format(e))
+            return InternalServerErrorSchema().build("Database Error")
+
         return NoticiaSchema().created(noticia)
 
     @jwt_required
     @restrict_access(['admin', 'editor', 'jornalista'])
-    def put(self, noticia_id):
-        noticia_id = int(noticia_id)
+    def put(self, noticia_slug=None):
         categoria_id = None
         data = request.get_json()
-        if not data or noticia_id is None:
+        if not data or noticia_slug is None:
             return EmptyDataSchema().build()
 
-        noticia = Noticia.query.get(noticia_id)
+        noticia = Noticia.query.filter(
+            Noticia.slug == noticia_slug
+        ).first()
         if not noticia:
             log.error('Noticia not found')
             return NoticiaNotFoundSchema().build()
@@ -210,14 +260,23 @@ class NoticiasView(MethodView):
             log.error("Error during update noticia: {}".format(e))
             return InternalServerErrorSchema().build()
 
+        try:
+            noticia.generate_slug()
+            db.session.flush()
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            log.error("Error during generate slug from noticia: {}".format(e))
+            return InternalServerErrorSchema().build("Database Error")
+
         return NoticiaSchema().dump(noticia)
 
     @jwt_required
     @restrict_access(['admin', 'editor', 'jornalista'])
-    def delete(self, noticia_id):
-        noticia_id = int(noticia_id)
-
-        noticia = Noticia.query.get(noticia_id)
+    def delete(self, noticia_slug=None):
+        noticia = Noticia.query.filter(
+            Noticia.slug == noticia_slug
+        ).first()
         if not noticia:
             return NoticiaNotFoundSchema().build()
 

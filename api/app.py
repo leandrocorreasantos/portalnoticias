@@ -3,6 +3,7 @@ import os
 from api import app as application
 from api.v1.resources import CategoriasView as v1_Categorias
 from api.v1.resources import NoticiasView as v1_Noticias
+from api.v1.resources import CategoriaNoticiaView as v1_CategoriaNoticia
 from api.v1.user_resources import UserView as v1_User
 from api.v1.user_resources import LoginView as v1_Login
 
@@ -15,7 +16,7 @@ application.add_url_rule(
 )
 
 application.add_url_rule(
-    '/v1/categoria/<categoria_id>',
+    '/v1/categoria/<int:categoria_id>',
     view_func=v1_Categorias.as_view('categoria'),
     methods=['GET', 'PUT', 'DELETE']
 )
@@ -49,7 +50,13 @@ application.add_url_rule(
 )
 
 application.add_url_rule(
-    '/v1/noticia/<noticia_id>',
+    '/v1/categoria/<categoria_slug>/noticias',
+    view_func=v1_CategoriaNoticia.as_view('noticias_by_cat_slug'),
+    methods=['GET']
+)
+
+application.add_url_rule(
+    '/v1/noticia/<noticia_slug>',
     view_func=v1_Noticias.as_view('noticia'),
     methods=['GET', 'PUT', 'DELETE']
 )

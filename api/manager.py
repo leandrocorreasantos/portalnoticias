@@ -30,7 +30,7 @@ def seed():
             log.error("Erro ao cadastrar grupo: {}".format(e))
             db.session.rollback()
 
-    # admin = Role.query.get(1)
+    admin = Role.query.get(1)
 
     user = {
         "id": 1,
@@ -39,7 +39,7 @@ def seed():
         "email": "admin@localhost",
         "first_name": "admin",
         "last_name": "admin",
-        "roles": [{"id": 1, "name": "admin"}]
+        "roles": [admin]
     }
 
     try:

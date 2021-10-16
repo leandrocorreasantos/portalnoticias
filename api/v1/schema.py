@@ -5,6 +5,7 @@ from http.client import (
     BAD_REQUEST,
     INTERNAL_SERVER_ERROR
 )
+from datetime import datetime
 
 from flask import jsonify
 from marshmallow import Schema, fields, validate
@@ -29,11 +30,14 @@ class CategoriaSchema(DefaultSchema):
 
 class NoticiaSchema(DefaultSchema):
     id = fields.Integer()
+    categoria_id = fields.Integer(load_only=True)
+    categoria = fields.Nested('CategoriaSchema')
     titulo = fields.String()
-    slug = fields.String(dump_only=True)
+    subtitulo = fields.String()
+    slug = fields.String()
     conteudo = fields.String()
     publicado = fields.Boolean(default=False)
-    data_publicacao = fields.DateTime()
+    data_publicacao = fields.DateTime(default=datetime.now())
     data_atualizacao = fields.DateTime()
     cliques = fields.Integer(default=0)
     meta_keywords = fields.String()

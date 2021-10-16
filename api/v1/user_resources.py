@@ -54,6 +54,10 @@ class LoginView(MethodView):
             log.error('no username found')
             return UserNotFoundSchema().build()
 
+        if not user:
+            log.error('no username found')
+            return UserNotFoundSchema().build()
+
         if not check_password_hash(user.password, password):
             log.error('diff password')
             return jsonify(
@@ -86,6 +90,7 @@ class UserView(MethodView):
         except ValidationError as err:
             log.error(err)
             return UserValidationErrorSchema().build(err)
+
         new_user['password'] = generate_password_hash(new_user['password'])
 
         user = User(**UserSchema().dump(new_user))

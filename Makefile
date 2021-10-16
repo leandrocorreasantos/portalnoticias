@@ -10,7 +10,7 @@ setup: upgrade-pip
 	${DOCKER_CMD} pip install -r requirements-local.txt
 
 flake8:
-	${DOCKER_CMD} flake8 --exclude=venv,test,migrations .
+	${DOCKER_CMD} flake8 --exclude=venv,tests,migrations .
 
 test:
 	${DOCKER_CMD} pytest tests
